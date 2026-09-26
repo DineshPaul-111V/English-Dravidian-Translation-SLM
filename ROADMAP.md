@@ -1,743 +1,1087 @@
 # TamilNLP
 
-## English → Tamil Translation SLM
+## English → Dravidian Translation SLM
 
 ---
 
 # 1. Project Vision
 
-Build an end-to-end English → Tamil machine translation system using a pretrained Hugging Face Seq2Seq model, fine-tuned on high-quality English–Tamil parallel data.
+Build an end-to-end English → Dravidian machine translation system using a pretrained Hugging Face Seq2Seq model, with Tamil as the primary fine-tuning language and support for multiple Dravidian target languages.
 
-The final product will contain:
+The current product will contain:
 
-* Fine-tuned translation model
+* Multilingual translation
+* Fine-tuned Tamil translation model
 * Dataset preparation pipeline
+* Dataset tokenization pipeline
 * Training pipeline
 * Evaluation pipeline
-* FastAPI backend
-* React frontend
-* Translation API
-* Model information API
-* Translation history
-* Testing
-* Docker support
-* Deployment
+* Translation service
+* Streamlit frontend
+* Multilingual target-language selection
+* Backend testing
+* Future translation history
+* Future PostgreSQL integration
+* Deployment support
 
 ---
 
 # 2. Core Objective
 
-The project will investigate whether fine-tuning a pretrained English/Dravidian translation model on curated English–Tamil parallel data improves translation quality.
+The project will investigate how effectively a pretrained multilingual English/Dravidian translation model can be used and fine-tuned for high-quality translation.
 
 Initial baseline model:
 
 `Helsinki-NLP/opus-mt-en-dra`
 
-The baseline will be evaluated before fine-tuning.
-
----
-
-# 3. High-Level Architecture
+The project currently supports:
 
 ```text
+English → Tamil
+English → Telugu
+English → Kannada
+English → Malayalam
+
+Tamil is the primary fine-tuning target.
+
+The pretrained multilingual model will always be treated as the baseline.
+
+Fine-tuning results will be evaluated against the baseline instead of assuming that fine-tuning automatically improves translation quality.
+
+3. High-Level Architecture
                          TamilNLP
+                            │
+                            ▼
+                   Streamlit Frontend
+                            │
+                            ▼
+                  Translation Service
                             │
               ┌─────────────┴─────────────┐
               │                           │
               ▼                           ▼
-        React Frontend              FastAPI Backend
+      Fine-tuned Tamil Model      Multilingual Base Model
+      models/finetuned/final      Helsinki-NLP/opus-mt-en-dra
               │                           │
-              │                    Translation Service
-              │                           │
-              │                           ▼
-              │                    Fine-tuned SLM
-              │                           │
-              └───────────────┬───────────┘
-                              │
-                              ▼
-                       English → Tamil
-```
+              ▼                           ▼
+            Tamil             Telugu / Kannada / Malayalam
 
----
+The translation service dynamically selects the appropriate model based on the selected target language.
 
-# 4. Project Components
-
-## 4.1 Frontend
+4. Project Components
+4.1 Frontend
 
 Technology:
 
-* React
-* Vite
-* JavaScript
-* CSS
+Python
+Streamlit
+
+Current frontend:
+
+frontend/app.py
 
 Main responsibilities:
 
-* English text input
-* Translation button
-* Tamil output
-* Loading state
-* Error state
-* Copy translation
-* Clear input
-* Translation history
-* Model information
+English text input
+Target language selection
+Translation button
+Translation output
+Loading state
+Empty-input validation
+Error handling
+
+Supported target languages:
+
+Tamil
+Telugu
+Kannada
+Malayalam
+
+Main user flow:
+
+English Input
+      ↓
+Target Language Selection
+      ↓
+Translate
+      ↓
+Translation Service
+      ↓
+Translated Output
 
 Future features:
 
-* Speech input
-* Text-to-speech
-* Document translation
-* Dark mode
-* Batch translation
-
----
-
-# 4.2 Backend
+Copy translation
+Clear input
+Translation history
+Model information
+Translation latency
+Batch translation
+Document translation
+Dark mode
+Speech input
+Text-to-speech
+4.2 Translation Service
 
 Technology:
 
-* Python
-* FastAPI
-* Uvicorn
-* Pydantic
+Python
+PyTorch
+Hugging Face Transformers
+
+Main file:
+
+backend/app/services/translation_service.py
 
 Responsibilities:
 
-* API request validation
-* Translation requests
-* Model loading
-* Tokenization
-* Model inference
-* Output decoding
-* Error handling
-* Health checks
-* Model information
+Target-language validation
+Model selection
+Tokenizer loading
+Model loading
+Model replacement
+Target-language token handling
+Model inference
+Output decoding
+CPU/GPU device selection
+Memory-aware model switching
 
-Main endpoints:
+Current model selection:
 
-```text
-POST /api/v1/translate
+Tamil
+  ↓
+Fine-tuned Tamil model when available
 
-GET /api/v1/health
+Telugu
+  ↓
+Multilingual base model
 
-GET /api/v1/model-info
-```
+Kannada
+  ↓
+Multilingual base model
 
----
-
-# 4.3 Translation Model
+Malayalam
+  ↓
+Multilingual base model
+4.3 Translation Model
 
 Initial model:
 
-`Helsinki-NLP/opus-mt-en-dra`
+Helsinki-NLP/opus-mt-en-dra
 
 Model architecture:
 
-* Encoder-decoder Transformer
-* Seq2Seq
-* MarianMT-compatible architecture
+Encoder-decoder Transformer
+Seq2Seq
+Multilingual translation model
+
+Target language tokens:
+
+Tamil      → >>tam<<
+Telugu     → >>tel<<
+Kannada    → >>kan<<
+Malayalam  → >>mal<<
 
 Pipeline:
 
-```text
 English
+
    ↓
+
+Target Language Token
+
+   ↓
+
 Tokenizer
+
    ↓
+
 Encoder
+
    ↓
+
 Decoder
+
    ↓
-Tamil Tokens
+
+Target Language Tokens
+
    ↓
-Tokenizer
-   ↓
-Tamil
-```
 
-The initial model is the baseline.
+Decoded Translation
 
-It will not automatically be assumed to be the final model.
+Tamil uses the locally fine-tuned model when available.
 
----
+The fine-tuned Tamil model is stored locally at:
 
-# 4.4 Dataset
+models/finetuned/final/
 
-Create an English–Tamil parallel dataset.
+Large model files are intentionally excluded from GitHub.
 
-Example:
+4.4 Dataset
 
-```text
-English:
-I am learning artificial intelligence.
+Primary dataset:
 
-Tamil:
-நான் செயற்கை நுண்ணறிவைக் கற்றுக்கொண்டு இருக்கிறேன்.
-```
+Helsinki-NLP/opus-100
+
+Primary language pair:
+
+English → Tamil
 
 Dataset requirements:
 
-* English sentence
-* Tamil translation
-* Correct alignment
-* No empty samples
-* No duplicate samples
-* Minimal corrupted data
-* Proper Tamil Unicode
-* Appropriate sentence length
+English sentence
+Tamil translation
+Correct alignment
+No empty samples
+Valid Tamil Unicode
+Minimal corrupted data
+Appropriate sentence length
+Reliable source-target pairing
 
----
+The dataset is processed into training-ready Parquet files.
 
-# 4.5 Dataset Splitting
+4.5 Dataset Splitting
 
 Dataset:
 
-```text
 Training
 Validation
 Test
-```
 
-Initial split:
+Final main dataset used in the training workflow:
 
-```text
-80% Training
-10% Validation
-10% Test
-```
+Training      177,483
+Validation      1,538
+Test            1,563
+-----------------------
+Total         180,584
 
-The test set must remain isolated from training.
+The test set remains isolated from training and validation.
 
----
+The training pipeline uses:
 
-# 5. Development Roadmap
+train.parquet
+validation.parquet
 
-## Phase 0 — Project Definition
+The evaluation pipeline uses:
+
+test.parquet
+
+The test set is not used by the fine-tuning process.
+
+5. Development Roadmap
+Phase 0 — Project Definition
 
 Objectives:
 
-* Define project scope
-* Define architecture
-* Define technology stack
-* Define model strategy
-* Define evaluation strategy
+Define project scope
+Define English → Dravidian translation goal
+Select Tamil as primary fine-tuning target
+Define supported languages
+Define model strategy
+Define evaluation strategy
+Define application architecture
 
 Deliverables:
 
-* `ROADMAP.md`
-* Project architecture
+ROADMAP.md
+README.md
+SETUP.md
+Project architecture
 
----
+Status:
 
-# Phase 1 — Environment
+Completed.
+
+Phase 1 — Environment
 
 Objectives:
 
-* Verify Python
-* Verify PyTorch
-* Verify GPU
-* Verify CUDA
-* Install ML dependencies
-* Install backend dependencies
-* Verify Hugging Face Transformers
+Verify Python
+Create virtual environment
+Install PyTorch
+Verify CPU support
+Install Hugging Face Transformers
+Install SentencePiece
+Install Accelerate
+Install SacreBLEU
+Install Streamlit
+Verify the ML environment
+
+Current environment:
+
+Python        3.12
+PyTorch       2.14.0+cpu
+Transformers  5.17.0
+Streamlit     1.64.0
+SentencePiece 0.2.2
+Accelerate    1.15.0
+SacreBLEU     2.6.0
 
 Deliverable:
 
 A working ML development environment.
 
----
+Status:
 
-# Phase 2 — Baseline Model
+Completed.
 
-Objectives:
-
-* Load tokenizer
-* Load pretrained model
-* Run English → Tamil inference
-* Test simple sentences
-* Test paragraphs
-* Record inference time
-* Save baseline outputs
-
-Deliverable:
-
-Working baseline translator.
-
----
-
-# Phase 3 — Dataset Preparation
+Phase 2 — Baseline Model
 
 Objectives:
 
-* Obtain English–Tamil parallel data
-* Inspect data
-* Clean data
-* Remove duplicates
-* Remove empty records
-* Validate language pairs
-* Normalize text
+Load tokenizer
+Load pretrained multilingual model
+Run English → Tamil inference
+Run English → Telugu inference
+Run English → Kannada inference
+Run English → Malayalam inference
+Validate target-language tokens
+Verify CPU inference
+
+Baseline scripts:
+
+experiments/baseline/baseline_translation.py
+experiments/baseline/test_multilingual.py
 
 Deliverable:
 
-Clean parallel dataset.
+Working multilingual baseline translator.
 
----
+Status:
 
-# Phase 4 — Dataset Analysis
+Completed.
+
+Phase 3 — Dataset Preparation
+
+Objectives:
+
+Obtain English–Tamil parallel data
+Inspect data
+Clean data
+Remove empty records
+Validate language pairs
+Validate Tamil Unicode
+Remove corrupted samples
+Maintain train, validation, and test separation
+
+Main file:
+
+training/prepare_dataset.py
+
+Deliverable:
+
+Clean English–Tamil parallel dataset.
+
+Status:
+
+Completed.
+
+Phase 4 — Dataset Analysis
 
 Objectives:
 
 Analyze:
 
-* Dataset size
-* Sentence lengths
-* Token lengths
-* Duplicate ratio
-* Empty records
-* English/Tamil distribution
-* Long sentences
-* Short sentences
+Dataset size
+Sentence lengths
+Token lengths
+Language consistency
+Alignment quality
+Corrupted examples
+Long sentences
+Short sentences
+Data quality issues
+Potential annotation contamination
 
 Deliverable:
 
-Dataset analysis report.
+Dataset quality analysis.
 
----
+Status:
 
-# Phase 5 — Dataset Splitting
+Completed as part of the dataset preparation and evaluation process.
+
+Phase 5 — Dataset Splitting
 
 Create:
 
-```text
 train
 validation
 test
-```
 
-Ensure no test samples leak into training.
+Requirements:
+
+Keep test data isolated
+Keep validation data separate
+Prevent test leakage
+Preserve source-target alignment
 
 Deliverable:
 
 Versioned dataset splits.
 
----
+Status:
 
-# Phase 6 — Tokenization
+Completed.
+
+Phase 6 — Tokenization
 
 Objectives:
 
-* Load pretrained tokenizer
-* Tokenize English inputs
-* Tokenize Tamil targets
-* Create labels
-* Set sequence length
-* Validate tokenization
+Load pretrained tokenizer
+Add target-language token to source text
+Tokenize English inputs
+Tokenize Tamil targets
+Create labels
+Set sequence length
+Validate tokenization
+Save tokenized Parquet data
+
+Main file:
+
+training/tokenize_dataset.py
+
+Current configuration:
+
+Maximum source length : 128
+Maximum target length : 128
+Batch size            : 256
+
+Example:
+
+>>tam<< How are you?
 
 Deliverable:
 
-Training-ready dataset.
+Training-ready tokenized dataset.
 
----
+Status:
 
-# Phase 7 — Fine-Tuning
+Completed.
+
+Phase 7 — Fine-Tuning
 
 Objectives:
 
-* Load pretrained model
-* Configure Seq2Seq training
-* Train on English–Tamil data
-* Validate during training
-* Save checkpoints
-* Select final model
+Load pretrained multilingual model
+Load tokenized English–Tamil dataset
+Configure Seq2Seq training
+Train on Tamil data
+Validate during training
+Save checkpoints
+Select final model
+Save tokenizer with the final model
 
-Initial training strategy:
+Main file:
 
-```text
-Small batch size
-Gradient accumulation
-FP16 where supported
-Short initial sequence length
-Low learning rate
-Limited initial epochs
-```
+training/train.py
 
-Training configuration will be adjusted according to hardware and results.
+Training configuration:
+
+Maximum steps            : 500
+Train batch size         : 2
+Evaluation batch size    : 2
+Gradient accumulation    : 1
+Learning rate            : 3e-5
+Warmup steps             : 50
+Logging steps            : 25
+Evaluation steps         : 100
+Save steps               : 100
+Device                   : CPU
+
+Final local model:
+
+models/finetuned/final/
 
 Deliverable:
 
 Fine-tuned English → Tamil model.
 
----
+Status:
 
-# Phase 8 — Model Evaluation
+Completed.
+
+Phase 8 — Model Evaluation
 
 Evaluate:
 
-* Validation loss
-* BLEU
-* chrF
-* COMET where appropriate
-* Translation latency
-* Human quality
+Validation loss
+BLEU
+chrF
+Base model output
+Fine-tuned model output
+Sentence-level translation quality
+Translation regressions
+Translation improvements
+
+Main file:
+
+training/evaluate_metrics.py
+
+Evaluation flow:
+
+Test Data
+   ↓
+Base Model Predictions
+   ↓
+Fine-tuned Model Predictions
+   ↓
+BLEU
+   ↓
+chrF
+   ↓
+Comparison
 
 Deliverable:
 
 Evaluation results.
 
----
+Status:
 
-# Phase 9 — Error Analysis
+Completed.
+
+Phase 9 — Error Analysis
 
 Analyze:
 
-* Incorrect word order
-* Missing words
-* Extra words
-* Incorrect meaning
-* Grammar
-* Named entities
-* Technical terms
-* Tamil fluency
-* Long sentence failures
+Incorrect word order
+Missing words
+Extra words
+Incorrect meaning
+Grammar problems
+Named entities
+Technical terms
+Long sentence failures
+Baseline regressions
+Fine-tuning improvements
+
+The project must record both improvements and regressions.
+
+The pretrained baseline must remain part of the comparison.
 
 Deliverable:
 
 Translation error analysis.
 
----
+Status:
 
-# Phase 10 — Base vs Fine-Tuned Comparison
+Completed for the current fine-tuning experiments.
+
+Phase 10 — Base vs Fine-Tuned Comparison
 
 Compare:
 
-```text
                  BASE MODEL
                       vs
-               FINE-TUNED MODEL
-```
+              FINE-TUNED MODEL
 
 Measurements:
 
-* BLEU
-* chrF
-* COMET where appropriate
-* Human evaluation
-* Inference latency
-* Model size
+BLEU
+chrF
+Translation quality
+Sentence-level results
+Translation regressions
+Translation improvements
 
 Deliverable:
 
 Model comparison report.
 
----
+Status:
 
-# Phase 11 — Model Packaging
+Completed.
 
-Package the final model with:
+Phase 11 — Model Packaging
 
-* Model weights
-* Configuration
-* Tokenizer
-* Tokenizer configuration
-* Model version
+Package the final Tamil model with:
+
+Model weights
+Configuration
+Tokenizer
+Tokenizer configuration
+Model version
+
+Local output:
+
+models/finetuned/final/
+
+The model directory is not uploaded to GitHub because the model files are large.
 
 Deliverable:
 
-Versioned translation model.
+Locally packaged Tamil translation model.
 
----
+Status:
 
-# Phase 12 — FastAPI Backend
+Completed.
 
-Build:
+Phase 12 — Translation Service
 
-```text
-POST /api/v1/translate
-GET  /api/v1/health
-GET  /api/v1/model-info
-```
+Build a reusable translation service.
+
+Main file:
+
+backend/app/services/translation_service.py
 
 Responsibilities:
 
-```text
 Request
- ↓
-Validation
- ↓
+   ↓
+Target Language Validation
+   ↓
+Model Selection
+   ↓
 Tokenizer
- ↓
+   ↓
 Model
- ↓
-Decoder
- ↓
-Response
-```
+   ↓
+Generation
+   ↓
+Decoded Translation
+
+Supported languages:
+
+Tamil
+Telugu
+Kannada
+Malayalam
 
 Deliverable:
 
-Working translation API.
+Working multilingual translation service.
 
----
+Status:
 
-# Phase 13 — React Frontend
+Completed.
+
+Phase 13 — Streamlit Frontend
 
 Build:
 
-```text
 English Input
+      ↓
+Target Language
       ↓
 Translate
       ↓
-Tamil Output
-```
+Translation Output
+
+Technology:
+
+Streamlit
+Python
+
+Main file:
+
+frontend/app.py
 
 Components:
 
-* Header
-* Translation box
-* Translation result
-* History
-* Loading state
-* Error state
+Application title
+Target-language selector
+English text box
+Translate button
+Loading state
+Translation result
+Warning state
+Error state
 
 Deliverable:
 
-Working translation UI.
+Working multilingual translation UI.
 
----
+Status:
 
-# Phase 14 — Frontend + Backend Integration
+Completed.
+
+Phase 14 — Frontend + Translation Service Integration
 
 Connect:
 
-```text
-React
-  ↓
-HTTP
-  ↓
-FastAPI
-  ↓
-Translation Model
-  ↓
-FastAPI
-  ↓
-React
-```
+Streamlit
+   ↓
+Translation Service
+   ↓
+Selected Language
+   ↓
+Appropriate Model
+   ↓
+Translation
+   ↓
+Streamlit Output
+
+Current application command:
+
+streamlit run frontend/app.py
 
 Deliverable:
 
-Full-stack translation application.
+Working local translation application.
 
----
+Status:
 
-# Phase 15 — Translation History
+Completed.
+
+Phase 15 — Translation History
 
 Store:
 
-* English text
-* Tamil translation
-* Timestamp
-* Model version
+English text
+Translation
+Target language
+Timestamp
+Model version
 
 Initial implementation:
 
-Browser/local storage.
+Local application storage.
 
 Future implementation:
 
-Database.
-
----
-
-# Phase 16 — Testing
-
-## Backend
-
-* API tests
-* Validation tests
-* Model tests
-* Error tests
-
-## Frontend
-
-* Component tests
-* Integration tests
-
-## ML
-
-* Dataset tests
-* Inference tests
-* Evaluation tests
+PostgreSQL.
 
 Deliverable:
 
-Tested application.
+Persistent translation history.
 
----
+Status:
 
-# Phase 17 — Docker
+Planned.
 
-Create containerized services:
+Phase 16 — PostgreSQL Integration
 
-```text
-Frontend
+PostgreSQL is planned for future persistent application features.
+
+Potential uses:
+
+Translation history
+Saved translations
+User data
+Usage analytics
+Model usage statistics
+
+Future architecture:
+
+Streamlit
+    │
+    ├───────────────► Translation Service
+    │
+    └───────────────► PostgreSQL
+                          │
+                          ├── Translation History
+                          ├── Users
+                          └── Analytics
+
+Objectives:
+
+Create database schema
+Configure secure PostgreSQL connection
+Store translation history
+Store user/application data
+Add analytics
+Manage database configuration through environment variables
+
+Deliverable:
+
+Database-backed application storage.
+
+Status:
+
+Planned.
+
+Phase 17 — Testing
 Backend
+Translation service tests
+Language selection tests
+Model loading tests
+Input validation tests
+Error handling tests
+
+Main test:
+
+backend/test_translation_service.py
+Multilingual
+Tamil translation
+Telugu translation
+Kannada translation
+Malayalam translation
+
+Main test:
+
+experiments/baseline/test_multilingual.py
+ML
+Dataset tests
+Tokenization tests
+Inference tests
+Evaluation tests
+
+Deliverable:
+
+Tested translation application.
+
+Status:
+
+Completed for the current implementation.
+
+Phase 18 — Docker
+
+Create a containerized application for:
+
+Streamlit Frontend
+Translation Service
 Model
-```
+
+Possible architecture:
+
+User
+  ↓
+Streamlit
+  ↓
+Translation Service
+  ↓
+Translation Model
+
+Docker support will be introduced only after the local application and model-loading behavior are stable.
 
 Deliverable:
 
 Docker-based local deployment.
 
----
+Status:
 
-# Phase 18 — Deployment
+Planned.
+
+Phase 19 — Deployment
 
 Deploy:
 
-```text
-Frontend
-      ↓
-Backend API
-      ↓
+User
+  ↓
+Streamlit Application
+  ↓
+Translation Service
+  ↓
 Translation Model
-```
+
+Deployment requirements:
+
+Correct Python environment
+Required dependencies
+Model availability
+CPU memory planning
+Environment variables
+Application startup configuration
+Secure configuration
 
 Possible deployment targets will be selected after local validation.
 
----
+Deliverable:
 
-# Phase 19 — Documentation
+Deployable translation application.
+
+Status:
+
+Planned.
+
+Phase 20 — Documentation
 
 Document:
 
-* Project overview
-* Architecture
-* Dataset
-* Model
-* Training
-* Evaluation
-* API
-* Frontend
-* Installation
-* Usage
-* Results
-* Limitations
-* Future improvements
+Project overview
+Current architecture
+Supported languages
+Dataset
+Dataset preparation
+Tokenization
+Model
+Fine-tuning
+Evaluation
+Translation service
+Streamlit frontend
+Testing
+Installation
+Local usage
+GitHub structure
+PostgreSQL plans
+Deployment
+Limitations
+Future improvements
+
+Documentation files:
+
+README.md
+ROADMAP.md
+SETUP.md
 
 Deliverable:
 
-Complete project documentation.
+Complete and up-to-date project documentation.
 
----
+Status:
 
-# Phase 20 — Advanced Features
+In progress.
+
+Phase 21 — Advanced Features
 
 Potential future features:
 
-* English speech input
-* Tamil text-to-speech
-* PDF translation
-* DOCX translation
-* Batch translation
-* Translation memory
-* Domain-specific models
-* Model comparison
-* User accounts
-* Database
-* Analytics dashboard
-
----
-
-# 6. Final Product Architecture
-
-```text
+English speech input
+Tamil text-to-speech
+Telugu text-to-speech
+Kannada text-to-speech
+Malayalam text-to-speech
+PDF translation
+DOCX translation
+Batch translation
+Translation memory
+Domain-specific translation
+Model comparison
+User accounts
+PostgreSQL database
+Analytics dashboard
+Translation history
+Model information
+Monitoring
+6. Final Product Architecture
                            USER
                             │
                             ▼
-                    ┌───────────────┐
-                    │ React Web App │
-                    └───────┬───────┘
-                            │
-                         REST API
-                            │
-                            ▼
-                    ┌───────────────┐
-                    │    FastAPI    │
-                    └───────┬───────┘
+                   ┌─────────────────┐
+                   │ Streamlit UI    │
+                   │ frontend/app.py │
+                   └────────┬────────┘
                             │
                             ▼
-                    ┌───────────────┐
-                    │ Translation   │
-                    │   Service     │
-                    └───────┬───────┘
+                   ┌─────────────────┐
+                   │ Translation     │
+                   │ Service         │
+                   └────────┬────────┘
+                            │
+               ┌────────────┴────────────┐
+               │                         │
+               ▼                         ▼
+       Fine-tuned Tamil          Multilingual Base
+            Model                     Model
+               │                         │
+               └────────────┬────────────┘
                             │
                             ▼
-                    ┌───────────────┐
-                    │ Fine-tuned    │
-                    │ Seq2Seq SLM   │
-                    └───────┬───────┘
+                     Target Translation
                             │
                             ▼
-                     Tamil Translation
-```
+                           USER
 
----
+Future persistent architecture:
 
-# 7. Final Success Criteria
+                           USER
+                            │
+                            ▼
+                   ┌─────────────────┐
+                   │ Streamlit UI    │
+                   └────────┬────────┘
+                            │
+                  ┌─────────┴─────────┐
+                  │                   │
+                  ▼                   ▼
+         Translation Service     PostgreSQL
+                  │                   │
+                  ▼                   ├── Users
+               Model                 ├── History
+                                      └── Analytics
+7. Final Success Criteria
 
 The project is considered complete when:
 
-* [ ] Dataset is prepared
-* [ ] Baseline model is evaluated
-* [ ] Model is fine-tuned
-* [ ] Fine-tuned model is evaluated
-* [ ] Base and fine-tuned models are compared
-* [ ] Model is packaged
-* [ ] FastAPI backend works
-* [ ] React frontend works
-* [ ] Frontend communicates with backend
-* [ ] Translation history works
-* [ ] Tests pass
-* [ ] Docker setup works
-* [ ] Documentation is complete
-* [ ] Application is deployable
+ Dataset is prepared
+ Baseline model is evaluated
+ Multilingual baseline is tested
+ Dataset is cleaned
+ Dataset is tokenized
+ Tamil model is fine-tuned
+ Fine-tuned model is evaluated
+ Base and fine-tuned models are compared
+ Model is packaged locally
+ Translation service works
+ Tamil translation works
+ Telugu translation works
+ Kannada translation works
+ Malayalam translation works
+ Streamlit frontend works
+ Frontend communicates with translation service
+ Backend tests work
+ Large datasets are excluded from GitHub
+ Large model files are excluded from GitHub
+ Project documentation is maintained
 
----
+Future completion targets:
 
-# 8. Development Principle
+ Translation history
+ PostgreSQL integration
+ Docker support
+ Deployment
+ Production monitoring
+ Advanced translation features
+8. Development Principle
 
 The project should be developed incrementally.
 
 Order:
 
-```text
 Environment
     ↓
 Baseline
     ↓
 Dataset
     ↓
+Dataset Analysis
+    ↓
+Dataset Splitting
+    ↓
+Tokenization
+    ↓
+Fine-Tuning
+    ↓
 Evaluation
     ↓
-Fine-tuning
+Error Analysis
     ↓
-Model packaging
+Translation Service
     ↓
-Backend
-    ↓
-Frontend
+Streamlit Frontend
     ↓
 Integration
     ↓
 Testing
     ↓
+Documentation
+    ↓
+PostgreSQL
+    ↓
 Docker
     ↓
 Deployment
-```
+    ↓
+Monitoring
 
 Do not build all components simultaneously.
 
-Each phase must be verified before moving to the next phase.
+Each phase must be verified before moving to the next major phase.
+
+The pretrained multilingual model remains the baseline for future model improvements.
+
+Every major model change should be evaluated before it is adopted.
+
+The project prioritizes:
+
+Correctness
+    ↓
+Evaluation
+    ↓
+Reproducibility
+    ↓
+Practicality
+    ↓
+Deployment

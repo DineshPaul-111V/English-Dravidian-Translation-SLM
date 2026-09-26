@@ -13,404 +13,643 @@ Navigate to the location where the project should be created.
 Example:
 
 ```powershell
-cd C:\Users\hp\Downloads
-```
+cd F:\
 
 Create the project:
 
-```powershell
-mkdir TamilNLP
-cd TamilNLP
-```
+mkdir English-Tamil_Trans_SLM
+
+cd English-Tamil_Trans_SLM
 
 Open the project in VS Code:
 
-```powershell
 code .
-```
-
----
-
-# 2. Create Python Virtual Environment
+2. Create Python Virtual Environment
 
 Check Python:
 
-```powershell
 python --version
-```
 
-Create virtual environment:
+The project currently uses:
 
-```powershell
+Python 3.12.0
+
+Create the virtual environment:
+
 python -m venv .venv
-```
 
 Activate it:
 
-```powershell
 .venv\Scripts\activate
-```
 
 Expected terminal:
 
-```text
-(.venv) PS C:\...\TamilNLP>
-```
+(.venv) PS F:\English-Tamil_Trans_SLM>
+3. Create Project Directories
 
----
+The project uses the following main directories:
 
-# 3. Create Project Directories
+backend/
+frontend/
+data/
+training/
+experiments/
+models/
 
-Create the main directories:
+Create them if starting from a fresh project:
 
-```powershell
 mkdir backend
 mkdir frontend
 mkdir data
 mkdir training
 mkdir experiments
 mkdir models
-mkdir notebooks
-```
 
 Create backend directories:
 
-```powershell
 mkdir backend\app
-mkdir backend\app\api
-mkdir backend\app\schemas
 mkdir backend\app\services
-mkdir backend\app\utils
-mkdir backend\models
-mkdir backend\tests
-```
 
 Create data directories:
 
-```powershell
 mkdir data\raw
 mkdir data\processed
 mkdir data\evaluation
-mkdir data\evaluation\baseline
-mkdir data\evaluation\finetuned
-```
 
 Create experiment directories:
 
-```powershell
 mkdir experiments\baseline
-mkdir experiments\finetuning
-```
 
 Create model directories:
 
-```powershell
-mkdir models\baseline
 mkdir models\finetuned
-```
 
----
+The project does not require the old FastAPI-specific directories such as:
 
-# 4. Create Root Files
+backend/app/api/
+backend/app/schemas/
+backend/app/utils/
+4. Create Root Files
 
-Create:
+The root project contains:
 
-```text
 ROADMAP.md
+
 SETUP.md
+
 README.md
+
 .gitignore
+
 requirements.txt
-```
 
----
+These files contain the project roadmap, environment setup, documentation, dependency definitions, and Git configuration.
 
-# 5. Create Python Package Files
+5. Current Project Structure
 
-Create:
+The current project structure is:
 
-```text
-backend/app/__init__.py
-backend/app/api/__init__.py
-backend/app/schemas/__init__.py
-backend/app/services/__init__.py
-backend/app/utils/__init__.py
-```
+English-Tamil_Trans_SLM/
 
----
-
-# 6. Create Backend Structure
-
-The backend will eventually contain:
-
-```text
-backend/
-├── app/
-│   ├── main.py
-│   ├── config.py
+├── backend/
+│   ├── app/
+│   │   └── services/
+│   │       └── translation_service.py
 │   │
-│   ├── api/
-│   │   └── routes.py
-│   │
-│   ├── schemas/
-│   │   └── translation.py
-│   │
-│   ├── services/
-│   │   ├── translator.py
-│   │   └── preprocessing.py
-│   │
-│   └── utils/
-│       └── logging.py
+│   └── test_translation_service.py
+│
+├── frontend/
+│   └── app.py
+│
+├── training/
+│   ├── prepare_dataset.py
+│   ├── tokenize_dataset.py
+│   ├── train.py
+│   └── evaluate_metrics.py
+│
+├── experiments/
+│   └── baseline/
+│       ├── baseline_translation.py
+│       └── test_multilingual.py
+│
+├── data/
+│   ├── raw/
+│   ├── processed/
+│   └── evaluation/
 │
 ├── models/
-└── tests/
-```
+│   └── finetuned/
+│       └── final/
+│
+├── ROADMAP.md
+├── SETUP.md
+├── README.md
+├── requirements.txt
+└── .gitignore
 
-These files will be implemented later according to the roadmap.
+Dataset files and trained model files are intentionally excluded from Git through .gitignore.
 
----
+6. Python Dependencies
 
-# 7. Python Dependencies
+The project uses a CPU-based PyTorch environment.
 
-The root `requirements.txt` will eventually contain the project's Python dependencies.
+The current requirements.txt contains:
 
-Initial dependencies:
+--extra-index-url https://download.pytorch.org/whl/cpu
 
-```text
-torch
-transformers
-datasets
-sentencepiece
-evaluate
-sacrebleu
+torch==2.14.0+cpu
+transformers==5.17.0
+sentencepiece==0.2.2
+accelerate==1.15.0
+sacrebleu==2.6.0
+streamlit
+pandas
+numpy
+pyarrow
+
+The project does not require:
+
 fastapi
 uvicorn
-pydantic
-python-dotenv
-numpy
-pandas
-```
+react
+vite
+torchvision
 
-Do not install blindly before verifying the local PyTorch/CUDA environment.
+The translation application currently runs using Streamlit and a Python translation service.
 
----
+7. Environment Verification
 
-# 8. Environment Verification
+Before installing the project dependencies, verify Python:
 
-Before installing the full ML stack, verify Python:
-
-```powershell
 python --version
-```
 
 Verify pip:
 
-```powershell
 python -m pip --version
-```
 
-Verify GPU visibility through NVIDIA:
+The expected Python version is:
 
-```powershell
-nvidia-smi
-```
+Python 3.12.0
 
-Record:
+The project is currently configured for CPU execution.
 
-* GPU name
-* VRAM
-* NVIDIA driver
-* CUDA information
+A dedicated NVIDIA GPU or CUDA installation is not required for the current setup.
 
----
+8. Install Project Dependencies
 
-# 9. Install Project Dependencies
+Upgrade pip:
 
-After environment verification, install the required packages.
-
-```powershell
 python -m pip install --upgrade pip
-```
 
-Then install the project requirements:
+Install the project requirements:
 
-```powershell
 pip install -r requirements.txt
-```
 
----
+Do not install additional packages unless they are required by the project.
 
-# 10. Verify PyTorch
+9. Verify PyTorch
 
-Run:
+Check the installed PyTorch version:
 
-```powershell
 python -c "import torch; print(torch.__version__)"
-```
 
-Check CUDA:
+Expected:
 
-```powershell
+2.14.0+cpu
+
+Check CUDA availability:
+
 python -c "import torch; print(torch.cuda.is_available())"
-```
 
-Check GPU:
+Expected:
 
-```powershell
-python -c "import torch; print(torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'CUDA GPU not available')"
-```
+False
 
----
+This is expected because the current project uses the CPU version of PyTorch.
 
-# 11. Verify Transformers
+10. Verify Transformers
 
 Run:
 
-```powershell
 python -c "import transformers; print(transformers.__version__)"
-```
 
----
+Expected:
 
-# 12. Git Setup
+5.17.0
+11. Verify Supporting Libraries
 
-Initialize Git:
+Verify SentencePiece:
 
-```powershell
+python -c "import sentencepiece; print(sentencepiece.__version__)"
+
+Expected:
+
+0.2.2
+
+Verify Accelerate:
+
+python -c "import accelerate; print(accelerate.__version__)"
+
+Expected:
+
+1.15.0
+
+Verify SacreBLEU:
+
+python -c "import sacrebleu; print(sacrebleu.__version__)"
+
+Expected:
+
+2.6.0
+
+Verify Streamlit:
+
+python -c "import streamlit; print(streamlit.__version__)"
+12. Streamlit Configuration
+
+The project uses Streamlit for the frontend.
+
+Create the Streamlit configuration directory:
+
+mkdir .streamlit
+
+Create:
+
+.streamlit/config.toml
+
+Add:
+
+[server]
+fileWatcherType = "none"
+
+This disables Streamlit's file watcher.
+
+The setting is required because the local Transformers installation can expose optional vision modules that may trigger repeated file-watcher warnings.
+
+Do not install torchvision just to solve the Streamlit watcher issue.
+
+13. Verify Baseline Model
+
+The project uses:
+
+Helsinki-NLP/opus-mt-en-dra
+
+for English → Dravidian translation.
+
+The supported language codes are:
+
+Tamil       → tam
+
+Telugu      → tel
+
+Kannada     → kan
+
+Malayalam   → mal
+
+The model is loaded automatically through the translation service.
+
+The base model can be tested using:
+
+python experiments\baseline\test_multilingual.py
+
+This verifies translation for:
+
+Tamil
+Telugu
+Kannada
+Malayalam
+14. Verify Fine-Tuned Tamil Model
+
+The Tamil translation service uses the fine-tuned model when it is available at:
+
+models/finetuned/final
+
+The fine-tuned model is based on:
+
+Helsinki-NLP/opus-mt-en-dra
+
+and was fine-tuned using the cleaned OPUS-100 English–Tamil dataset.
+
+The model directory is intentionally excluded from Git.
+
+If the local model is available, the translation service automatically loads it for Tamil translation.
+
+15. Backend Translation Service
+
+The translation logic is located at:
+
+backend/app/services/translation_service.py
+
+The service:
+
+1. Selects the target language
+
+2. Selects the appropriate model
+
+3. Loads the model
+
+4. Formats the source text with the target language token
+
+5. Performs translation
+
+6. Returns the translated text
+
+The main translation function is:
+
+translate(text, target_language="Tamil")
+
+The supported target languages are:
+
+Tamil
+Telugu
+Kannada
+Malayalam
+16. Streamlit Frontend
+
+The application frontend is located at:
+
+frontend/app.py
+
+Start the Streamlit application from the project root:
+
+streamlit run frontend\app.py
+
+Streamlit will display a local URL such as:
+
+http://localhost:8501
+
+The application provides:
+
+English input
+        ↓
+Target language selection
+        ↓
+Translation
+        ↓
+Translated output
+
+The frontend currently supports:
+
+Tamil
+
+Telugu
+
+Kannada
+
+Malayalam
+17. Test Translation Service
+
+The backend translation service can be tested directly using:
+
+python backend\test_translation_service.py
+
+This test checks translation for the supported target languages.
+
+The application should successfully load the appropriate model and return translated text.
+
+18. Dataset Preparation
+
+The project uses the:
+
+Helsinki-NLP/opus-100
+
+English–Tamil dataset.
+
+The dataset is prepared using:
+
+python training\prepare_dataset.py
+
+The cleaned dataset is stored under:
+
+data/processed/
+
+The dataset preparation process includes:
+
+Dataset loading
+        ↓
+Data cleaning
+        ↓
+English/Tamil validation
+        ↓
+Tamil Unicode validation
+        ↓
+Clean dataset creation
+19. Dataset Tokenization
+
+The cleaned dataset is tokenized using:
+
+python training\tokenize_dataset.py
+
+The tokenized dataset is stored under:
+
+data/processed/opus100_en_ta_tokenized
+
+The project uses a maximum source and target token length of:
+
+128
+
+The target language token is included in the source text for multilingual translation.
+
+20. Model Fine-Tuning
+
+Training is performed using:
+
+python training\train.py
+
+The training process uses:
+
+Base Model
+    ↓
+Prepared Dataset
+    ↓
+Tokenized Dataset
+    ↓
+Fine-Tuning
+    ↓
+Fine-Tuned Tamil Model
+
+The final local model is stored at:
+
+models/finetuned/final
+
+Model files are not committed to Git.
+
+21. Model Evaluation
+
+Evaluation is performed using:
+
+python training\evaluate_metrics.py
+
+The project uses translation evaluation metrics including:
+
+BLEU
+
+chrF
+
+Evaluation should compare model outputs against reference Tamil translations.
+
+The current project uses evaluation results to determine whether fine-tuning actually improves translation quality compared with the strong multilingual baseline.
+
+22. Git Setup
+
+Initialize Git when creating the project from scratch:
+
 git init
-```
 
-Check:
+Check the repository:
 
-```powershell
 git status
-```
 
 Add files:
 
-```powershell
 git add .
-```
 
-Initial commit:
+Create the initial commit:
 
-```powershell
-git commit -m "Initialize TamilNLP project"
-```
+git commit -m "Initial clean project setup"
 
----
+The project should not commit:
 
-# 13. VS Code
+.venv/
 
-Recommended extensions:
+data/raw/
 
-* Python
-* Pylance
-* Jupyter
-* GitLens
-* ESLint
-* Prettier
+data/processed/
+
+models/
+
+*.safetensors
+
+*.bin
+
+*.pt
+
+*.pth
+
+These files are excluded through .gitignore.
+
+23. VS Code Setup
+
+Recommended VS Code extensions:
+
+Python
+
+Pylance
+
+Jupyter
+
+GitLens
 
 Select the project Python interpreter:
 
-```text
 .venv
-```
 
----
+The project currently uses a Python-based Streamlit frontend, so React-specific extensions are not required.
 
-# 14. Frontend Setup
+24. Project Execution
 
-Frontend will be created using Vite.
+After activating the virtual environment:
 
-From the project root:
+.venv\Scripts\activate
 
-```powershell
-npm create vite@latest frontend -- --template react
-```
+Start the application:
 
-Then:
+streamlit run frontend\app.py
 
-```powershell
-cd frontend
-npm install
-```
+The application should open at:
 
-Start development server:
+http://localhost:8501
 
-```powershell
-npm run dev
-```
+The complete runtime architecture is:
 
-Return to project root:
+Streamlit Frontend
+        ↓
+Translation Service
+        ↓
+Tamil Fine-Tuned Model
+        ↓
+Translated Tamil Text
 
-```powershell
-cd ..
-```
+For Telugu, Kannada, and Malayalam:
 
----
-
-# 15. Development Servers
-
-Backend:
-
-```powershell
-uvicorn backend.app.main:app --reload
-```
-
-Frontend:
-
-```powershell
-cd frontend
-npm run dev
-```
-
-Backend and frontend will eventually run independently during development.
-
----
-
-# 16. Development Order
+Streamlit Frontend
+        ↓
+Translation Service
+        ↓
+Helsinki-NLP/opus-mt-en-dra
+        ↓
+Translated Text
+25. Development Order
 
 Setup must be performed in this order:
 
-```text
 Create project
-      ↓
+
+        ↓
+
 Create virtual environment
-      ↓
+
+        ↓
+
 Verify Python
-      ↓
-Verify NVIDIA GPU
-      ↓
-Install PyTorch
-      ↓
-Verify CUDA
-      ↓
+
+        ↓
+
+Install CPU PyTorch
+
+        ↓
+
+Verify PyTorch
+
+        ↓
+
 Install Transformers
-      ↓
-Verify Hugging Face
-      ↓
-Initialize Git
-      ↓
-Create frontend
-      ↓
-Verify frontend
-      ↓
-Begin ML baseline
-```
 
----
+        ↓
 
-# 17. Important Rule
+Verify Hugging Face libraries
 
-Do not start model fine-tuning until:
+        ↓
 
-* Python is working
-* Virtual environment is working
-* PyTorch is working
-* CUDA is working if GPU training is intended
-* Transformers is working
-* Baseline model can be loaded
-* Baseline translation has been tested
+Configure Streamlit
 
-The model must be established as a baseline before fine-tuning.
+        ↓
+
+Verify baseline model
+
+        ↓
+
+Prepare dataset
+
+        ↓
+
+Tokenize dataset
+
+        ↓
+
+Fine-tune Tamil model
+
+        ↓
+
+Evaluate model
+
+        ↓
+
+Run translation service tests
+
+        ↓
+
+Start Streamlit application
+26. Important Rule
+
+Do not start fine-tuning until:
+
+Python is working
+Virtual environment is working
+PyTorch is working
+Transformers is working
+SentencePiece is working
+Baseline model can be loaded
+Baseline translation has been tested
+Dataset preparation has completed
+Tokenization has completed
