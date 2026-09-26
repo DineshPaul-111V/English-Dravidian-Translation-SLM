@@ -1,0 +1,38 @@
+
+# Virtual environment
+.venv/
+.venv-1/
+
+# Datasets
+data/raw/
+data/processed/
+data/evaluation/
+
+# Model files
+models/
+*.safetensors
+*.bin
+*.pt
+*.pth
+
+# Training outputs
+runs/
+checkpoints/
+wandb/
+tensorboard/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Secrets
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+
+# Streamlit secrets
+.streamlit/secrets.toml
